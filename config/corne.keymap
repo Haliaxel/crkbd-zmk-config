@@ -1,0 +1,218 @@
+/*
+ * CRKBD ZMK Keymap v2 — COMFORT EDITION
+ * Hebrew + English · Lawyer Layout · Linux (KDE/Wayland) + Windows 11
+ * 42 keys · 4 ZMK layers: EN / SYM / NAV / FUN (tri-layer)
+ *
+ * DESIGN PRINCIPLES
+ *   1. NO hold-taps on letter keys — zero misfires at any typing speed
+ *   2. Shift at standard pinky positions (pos 24 & 35) — zero relearning
+ *   3. Ctrl on left thumb — every Office chord becomes thumb + finger
+ *   4. NAV on LEFT thumb → right hand free for inverse-T arrows (IJKL)
+ *   5. Same-letter mnemonics on NAV: A=All S=Save F=Find G=GoTo Z/X/C/V=clipboard
+ *   6. Numbers on SYM home row; shifted symbol directly above each digit
+ *   7. FUN = hold both inner thumbs (conditional tri-layer)
+ *
+ * Key positions:
+ *   0- 5 / 6-11  : top row      12-17 / 18-23 : home row
+ *  24-29 / 30-35 : bottom row   36-38 / 39-41 : thumbs
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+
+#define EN  0
+#define SYM 1
+#define NAV 2
+#define FUN 3
+// No Hebrew layer — OS input source handles all Hebrew mapping.
+
+/ {
+    // FUN activates automatically when NAV and SYM are both held
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        tri_layer {
+            if-layers = <NAV SYM>;
+            then-layer = <FUN>;
+        };
+    };
+
+    macros {
+        m_sect: macro_section {        // § U+00A7
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N0 &kp N0 &kp A &kp N7>,
+                       <&kp RET>;
+        };
+        m_copy: macro_copyright {      // © U+00A9
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N0 &kp N0 &kp A &kp N9>,
+                       <&kp RET>;
+        };
+        m_oq: macro_open_quote {       // “ U+201C
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N2 &kp N0 &kp N1 &kp C>,
+                       <&kp RET>;
+        };
+        m_cq: macro_close_quote {      // ” U+201D
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N2 &kp N0 &kp N1 &kp D>,
+                       <&kp RET>;
+        };
+        m_em: macro_em_dash {          // — U+2014
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N2 &kp N0 &kp N1 &kp N4>,
+                       <&kp RET>;
+        };
+        m_nis: macro_shekel {          // ₪ U+20AA  (New Israeli Shekel)
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N2 &kp N0 &kp A &kp A>,
+                       <&kp RET>;
+        };
+        m_gsh: macro_gershayim {       // ״ U+05F4  (עו״ד, פס״ד, ביהמ״ש)
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>; tap-ms = <10>;
+            bindings = <&kp LC(LS(U))>,
+                       <&kp N0 &kp N5 &kp F &kp N4>,
+                       <&kp RET>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        // Layer 0: English — pure QWERTY, no dual-function letters
+        //  ESC   Q    W    E    R    T  |  Y    U    I    O    P   BSPC
+        //  TAB   A    S    D    F    G  |  H    J    K    L    ;    '
+        //  SHFT  Z    X    C    V    B  |  N    M    ,    .    /   SHFT
+        //      [ALT][CTRL][NAV]         | [SYM][SPC][ENT]
+        english_layer {
+            label = "EN";
+            bindings = <
+                &kp ESC    &kp Q   &kp W   &kp E     &kp R   &kp T
+                &kp Y      &kp U   &kp I   &kp O     &kp P   &kp BSPC
+                &kp TAB    &kp A   &kp S   &kp D     &kp F   &kp G
+                &kp H      &kp J   &kp K   &kp L     &kp SEMI &kp SQT
+                &kp LSHFT  &kp Z   &kp X   &kp C     &kp V   &kp B
+                &kp N      &kp M   &kp COMMA &kp DOT &kp FSLH &kp RSHFT
+                &kp LALT   &kp LCTRL &mo NAV
+                &mo SYM    &kp SPACE &kp ENTER
+            >;
+        };
+
+        // Layer 1: Symbols — hold RIGHT inner thumb
+        //  ▸    !    @    #    $    %  |  ^    &    *    (    )    ▸
+        //  `    1    2    3    4    5  |  6    7    8    9    0    -
+        //  ▸    ₪    ״    =    [    ]  |  “    ”    —    §    ©    ▸
+        //  Numbers on HOME ROW. Shifted symbol directly above its digit.
+        //  Real Shift gives: ` → ~   - → _   = → +   [ → {   ] → }
+        symbols_layer {
+            label = "SYM";
+            bindings = <
+                &trans     &kp EXCL &kp AT  &kp HASH  &kp DLLR &kp PRCNT
+                &kp CARET  &kp AMPS &kp STAR &kp LPAR &kp RPAR &trans
+                &kp GRAVE  &kp N1  &kp N2   &kp N3    &kp N4  &kp N5
+                &kp N6     &kp N7  &kp N8   &kp N9    &kp N0  &kp MINUS
+                &trans     &m_nis  &m_gsh   &kp EQUAL &kp LBKT &kp RBKT
+                &m_oq      &m_cq   &m_em    &m_sect   &m_copy &trans
+                &trans     &trans  &trans
+                &trans     &trans  &trans
+            >;
+        };
+
+        // Layer 2: Navigation — hold LEFT inner thumb (right hand = arrows)
+        //  ▸   ⌃N   ⌃O   ⌃H   ⌃P  PrtS | ⌃Hm  PgUp  ↑   PgDn ⌃End  ▸
+        //  ▸   ⌃A   ⌃S   WIN  ⌃F   ⌃G  | Home  ←    ↓    →   End  DEL
+        //  ▸   ⌃Z   ⌃X   ⌃C   ⌃V  ⌃⇧V | ⌃⌫   ⌃←   ⌃→   ⌃⌦  APP   ▸
+        //  Same-letter mnemonics: A=SelectAll S=Save F=Find G=GoTo(page!)
+        //  Z/X/C/V = clipboard one-handed (mouse stays in right hand)
+        //  B = paste UNFORMATTED (Ctrl+Shift+V) — essential pasting into Word
+        //  Inverse-T arrows on IJKL · word-jump & word-delete under arrows
+        nav_layer {
+            label = "NAV";
+            bindings = <
+                &trans       &kp LC(N)  &kp LC(O)  &kp LC(H)  &kp LC(P)  &kp PSCRN
+                &kp LC(HOME) &kp PG_UP  &kp UP     &kp PG_DN  &kp LC(END) &trans
+                &trans       &kp LC(A)  &kp LC(S)  &kp LGUI   &kp LC(F)  &kp LC(G)
+                &kp HOME     &kp LEFT   &kp DOWN   &kp RIGHT  &kp END    &kp DEL
+                &trans       &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)  &kp LC(LS(V))
+                &kp LC(BSPC) &kp LC(LEFT) &kp LC(RIGHT) &kp LC(DEL) &kp K_APP &trans
+                &trans       &trans     &trans
+                &trans       &trans     &trans
+            >;
+        };
+
+        // Layer 3: Function — hold BOTH inner thumbs (tri-layer, automatic)
+        //  ▸   F1   F2   F3   F4   F5  |  F6   F7   F8   F9  F10  F11
+        //  ▸  BT1  BT2  BT3 BTCLR USB |  ⏮  Vol- Mute Vol+  ⏭  F12
+        //  ▸  CapsWd Caps ⌥F4  ·   ·  |  ⏵  Bri- Bri+ ScLk Brk   ▸
+        //  F7 = Word spellcheck · F12 = Save As · CapsWord = caps until space
+        fun_layer {
+            label = "FUN";
+            bindings = <
+                &trans      &kp F1       &kp F2       &kp F3       &kp F4      &kp F5
+                &kp F6      &kp F7       &kp F8       &kp F9       &kp F10     &kp F11
+                &trans      &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_CLR  &out OUT_TOG
+                &kp C_PREV  &kp C_VOL_DN &kp C_MUTE   &kp C_VOL_UP &kp C_NEXT  &kp F12
+                &trans      &caps_word   &kp CAPS     &kp LA(F4)   &none       &none
+                &kp C_PP    &kp C_BRI_DN &kp C_BRI_UP &kp SLCK     &kp PAUSE_BREAK &trans
+                &trans      &trans       &trans
+                &trans      &trans       &trans
+            >;
+        };
+    };
+};
+
+/*
+ * SETUP NOTES
+ *
+ * UNICODE INPUT
+ *   Linux (IBus/Fcitx5): macros send Ctrl+Shift+U → hex → Enter.
+ *     Verify in Kate: Ctrl+Shift+U, 20aa, Enter → ₪
+ *   Windows 11: install WinCompose (github.com/samhocevar/wincompose):
+ *     § = Compose s o    © = Compose o c    — = Compose - - -
+ *     “ = Compose < "    ” = Compose > "
+ *     ₪ and ״: define custom sequences in WinCompose, or use Win+.
+ *
+ * WHY NO HOLD-TAPS ON LETTERS
+ *   At sustained typing speed, hold-taps misfire (rolls register as holds).
+ *   This layout has hold behavior ONLY on the two layer thumb keys,
+ *   which are never part of letter rolls. Result: deterministic typing.
+ *
+ * CHORD REFERENCE (most common in MS Word / LibreOffice)
+ *   Bold/Italic/Underline ... Ctrl(thumb 37) + B/I/U
+ *   Select All / Save ....... NAV+A / NAV+S  (or Ctrl+A / Ctrl+S)
+ *   Find / Replace .......... NAV+F / NAV+H (Replace lives on top row H col)
+ *   Go To page .............. NAV+G  (Ctrl+G — jump to page number)
+ *   Paste unformatted ....... NAV+B  (Ctrl+Shift+V, one chord)
+ *   Select text ............. Shift(pinky) + NAV(thumb) + arrows
+ *   Select word-by-word ..... Shift + NAV + Word←/Word→
+ *   Delete previous word .... NAV + DelWd←  (Ctrl+Backspace)
+ *   Window switch ........... Alt(36) + TAB(12)
+ *   Close window ............ FUN + ⌥F4 key (pre-combined Alt+F4)
+ *   Spellcheck / Save As .... FUN + F7 / FUN + F12
+ *
+ * RECOMMENDED config/corne.conf
+ *   CONFIG_ZMK_SLEEP=y
+ *   CONFIG_ZMK_IDLE_SLEEP_TIMEOUT=900000
+ *   CONFIG_ZMK_BT_CLEAR_BONDS_ON_START=n
+ */
